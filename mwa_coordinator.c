@@ -37,8 +37,6 @@
 #include "board.h"
 #include "fsl_os_abstraction.h"
 
-
-#include"MyNewTask.h"
 /************************************************************************************
 *************************************************************************************
 * Private macros
@@ -187,8 +185,6 @@ void main_task(uint32_t param)
 *****************************************************************************/
 void App_init( void )
 {
-	MyTask_Init();/* INIT MY NEW TASK */
-
     mAppEvent = OSA_EventCreate(TRUE);
     /* The initial application state */
     gState = stateInit;
@@ -316,6 +312,8 @@ void AppThread(uint32_t argument)
               Serial_PrintHex(interfaceId,&mLogicalChannel, 1, gPrtHexNoFormat_c);
               Serial_Print(interfaceId,".\n\r", gAllowToBlock_d);
 
+
+
               ret = App_StartCoordinator(0);
               if(ret == errorNoError)
               {
@@ -329,7 +327,6 @@ void AppThread(uint32_t argument)
       case stateStartCoordinatorWaitConfirm:
           /* Stay in this state until the Start confirm message
           arrives, and then goto the Listen state. */
-
           if (ev & gAppEvtMessageFromMLME_c)
           {
               if (pMsgIn)
@@ -343,8 +340,6 @@ void AppThread(uint32_t argument)
                       Serial_PrintHex(interfaceId,(uint8_t *)&mShortAddress, 2, gPrtHexNoFormat_c);
                       Serial_Print(interfaceId,".\n\rReady to send and receive data over the UART.\n\r\n\r", gAllowToBlock_d);
                       
-                      MyTaskTimer_Start(); /*Start LED flashing with your task*/
-
                       gState = stateListen;
                       OSA_EventSet(mAppEvent, gAppEvtDummyEvent_c);
                   }
@@ -555,23 +550,23 @@ static void App_HandleScanEdConfirm(nwkMessage_t *pMsg)
       }      
 #else      
   /* Select default channel */
-  mLogicalChannel = 11;
+  mLogicalChannel = 13;
   
   /* Search for the channel with least energy */
-  for(idx=0, n=0; n<16; n++)
-  {
-      /* Channel numbering is 11 to 26 both inclusive */
-      Channel = n + 11;
-      if( (chMask & (1 << Channel)) )
-      {
-          if( pEdList[idx] < minEnergy )
-          {
-              minEnergy = pEdList[idx];
-              mLogicalChannel = Channel;
-          }
-          idx++;
-      }
-  }
+//  for(idx=0, n=0; n<16; n++)
+//  {
+//      /* Channel numbering is 11 to 26 both inclusive */
+//      Channel = n + 11;
+//      if( (chMask & (1 << Channel)) )
+//      {
+//          if( pEdList[idx] < minEnergy )
+//          {
+//              minEnergy = pEdList[idx];
+//              mLogicalChannel = Channel;
+//          }
+//          idx++;
+//      }
+//  }
 #endif /* gPHY_802_15_4g_d */     
 
   chMask &= ~(1 << mLogicalChannel);
@@ -794,7 +789,6 @@ static uint8_t App_HandleMlmeInput(nwkMessage_t *pMsg, uint8_t appInstance)
   case gMlmeAssociateInd_c:
     Serial_Print(interfaceId,"Received an MLME-Associate Indication from the MAC\n\r", gAllowToBlock_d);
     /* A device sent us an Associate Request. We must send back a response.  */
-	  MyTaskTimer_Stop();/* STOP Timer from MY NEW TASK*/
     return App_SendAssociateResponse(pMsg, appInstance);
     
   case gMlmeCommStatusInd_c:
