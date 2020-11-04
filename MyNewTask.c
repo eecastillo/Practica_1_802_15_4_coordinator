@@ -66,7 +66,7 @@ void My_Task(osaTaskParam_t argument){
 	}
 }
 
-/* Function to initthe task */
+/* Function to init the task */
 void MyTask_Init(void){
 	mMyEvents = OSA_EventCreate(TRUE);
 	/* The instance of the MAC is passed at task creaton*/
