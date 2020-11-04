@@ -38,7 +38,7 @@
 #define mDefaultValueOfShortAddress_c     0xCAFE
 
 /* Set the Coordinator PanID */ 
-#define mDefaultValueOfPanId_c            0xBEEF
+#define mDefaultValueOfPanId_c            0x3333
 
 /* Maximum number of outstanding packets */
 #define mDefaultValueOfMaxPendingDataPackets_c 2

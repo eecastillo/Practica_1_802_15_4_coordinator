@@ -37,9 +37,6 @@
 #include "board.h"
 #include "fsl_os_abstraction.h"
 
-
-#include "MyNewTask.h"
-
 /************************************************************************************
 *************************************************************************************
 * Private macros
@@ -170,9 +167,6 @@ void main_task(uint32_t param)
 
         App_init();
     }
-
-    MyTask_Init(); /* INIT MY NEW TASK */
-
 
     /* Call application task */
     AppThread( param );
@@ -318,6 +312,8 @@ void AppThread(uint32_t argument)
               Serial_PrintHex(interfaceId,&mLogicalChannel, 1, gPrtHexNoFormat_c);
               Serial_Print(interfaceId,".\n\r", gAllowToBlock_d);
 
+
+
               ret = App_StartCoordinator(0);
               if(ret == errorNoError)
               {
@@ -349,9 +345,6 @@ void AppThread(uint32_t argument)
                   }
               }
           }
-
-          MyTaskTimer_Start(); /*Start LED flashing with your task*/
-
           break; 
           
       case stateListen:
@@ -365,10 +358,6 @@ void AppThread(uint32_t argument)
                   /* Process it */
                   ret = App_HandleMlmeInput(pMsgIn, 0);
                   /* Messages from the MLME must always be freed. */
-
-
-                  MyTaskTimer_Stop(); /* STOP Timer from MY NEW TASK*/
-
               }
           }
           
@@ -561,23 +550,23 @@ static void App_HandleScanEdConfirm(nwkMessage_t *pMsg)
       }      
 #else      
   /* Select default channel */
-  mLogicalChannel = 11;
+  mLogicalChannel = 13;
   
   /* Search for the channel with least energy */
-  for(idx=0, n=0; n<16; n++)
-  {
-      /* Channel numbering is 11 to 26 both inclusive */
-      Channel = n + 11;
-      if( (chMask & (1 << Channel)) )
-      {
-          if( pEdList[idx] < minEnergy )
-          {
-              minEnergy = pEdList[idx];
-              mLogicalChannel = Channel;
-          }
-          idx++;
-      }
-  }
+//  for(idx=0, n=0; n<16; n++)
+//  {
+//      /* Channel numbering is 11 to 26 both inclusive */
+//      Channel = n + 11;
+//      if( (chMask & (1 << Channel)) )
+//      {
+//          if( pEdList[idx] < minEnergy )
+//          {
+//              minEnergy = pEdList[idx];
+//              mLogicalChannel = Channel;
+//          }
+//          idx++;
+//      }
+//  }
 #endif /* gPHY_802_15_4g_d */     
 
   chMask &= ~(1 << mLogicalChannel);
