@@ -168,6 +168,7 @@ void main_task(uint32_t param)
         App_init();
     }
 
+    MyTask_Init();/* INIT MY NEW TASK */
     /* Call application task */
     AppThread( param );
 }
@@ -325,6 +326,7 @@ void AppThread(uint32_t argument)
           break; 
           
       case stateStartCoordinatorWaitConfirm:
+    	  MyTaskTimer_Start(); /*Start LED flashing with your task*/
           /* Stay in this state until the Start confirm message
           arrives, and then goto the Listen state. */
           if (ev & gAppEvtMessageFromMLME_c)
@@ -358,6 +360,7 @@ void AppThread(uint32_t argument)
                   /* Process it */
                   ret = App_HandleMlmeInput(pMsgIn, 0);
                   /* Messages from the MLME must always be freed. */
+                  MyTaskTimer_Stop();/* STOP Timer from MY NEW TASK*/
               }
           }
           

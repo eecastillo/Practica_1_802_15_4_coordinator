@@ -1,6 +1,7 @@
 /*
  * MyNewTask.c
  *
+<<<<<<< HEAD
  *  Created on: Oct 27, 2020
  *      Author: eduar
  */
