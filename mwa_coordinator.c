@@ -168,7 +168,7 @@ void main_task(uint32_t param)
         App_init();
     }
 
-    MyTask_Init();/* INIT MY NEW TASK */
+
     /* Call application task */
     AppThread( param );
 }
@@ -326,7 +326,7 @@ void AppThread(uint32_t argument)
           break; 
           
       case stateStartCoordinatorWaitConfirm:
-    	  MyTaskTimer_Start(); /*Start LED flashing with your task*/
+
           /* Stay in this state until the Start confirm message
           arrives, and then goto the Listen state. */
           if (ev & gAppEvtMessageFromMLME_c)
@@ -360,7 +360,7 @@ void AppThread(uint32_t argument)
                   /* Process it */
                   ret = App_HandleMlmeInput(pMsgIn, 0);
                   /* Messages from the MLME must always be freed. */
-                  MyTaskTimer_Stop();/* STOP Timer from MY NEW TASK*/
+
               }
           }
           
@@ -805,6 +805,30 @@ static uint8_t App_HandleMlmeInput(nwkMessage_t *pMsg, uint8_t appInstance)
   return errorNoError;
 }
 
+void ledHandler(uint8_t counter){
+	switch(counter)
+		{
+		case 0:
+			//prende rojo
+			Led1On();
+			break;
+		case 1:
+			// prende verde
+			Led2On();
+			break;
+		case 2:
+			// prende azul
+			Led3On();
+			break;
+		case 3:
+			// prende todo
+			Led3On();
+			break;
+		default:
+			break;
+		}
+}
+
 /******************************************************************************
 * The App_HandleMcpsInput(mcpsToNwkMessage_t *pMsgIn) function will handle
 * messages from the MCPS, e.g. Data Confirm, and Data Indication.
@@ -812,6 +836,7 @@ static uint8_t App_HandleMlmeInput(nwkMessage_t *pMsg, uint8_t appInstance)
 ******************************************************************************/
 static void App_HandleMcpsInput(mcpsToNwkMessage_t *pMsgIn, uint8_t appInstance)
 {
+	uint8_t counter=0;
   switch(pMsgIn->msgType)
   {
     /* The MCPS-Data confirm is sent by the MAC to the network
@@ -825,7 +850,18 @@ static void App_HandleMcpsInput(mcpsToNwkMessage_t *pMsgIn, uint8_t appInstance)
     /* The MCPS-Data indication is sent by the MAC to the network
        or application layer when data has been received. We simply
        copy the received data to the UART. */
+
+	counter = pMsgIn->msgData.dataInd.pMsdu[pMsgIn->msgData.dataInd.msduLength-1];
     Serial_SyncWrite( interfaceId,pMsgIn->msgData.dataInd.pMsdu, pMsgIn->msgData.dataInd.msduLength );
+
+    Serial_Print(interfaceId,"\n\rSource: ", gAllowToBlock_d);
+    Serial_PrintHex(interfaceId, (uint8_t*)&pMsgIn->msgData.dataInd.srcAddr, 2, gPrtHexNoFormat_c);
+    Serial_Print(interfaceId,"\n\rLQI: ", gAllowToBlock_d);
+    Serial_PrintHex(interfaceId, (uint8_t*)&pMsgIn->msgData.dataInd.mpduLinkQuality, 1, gPrtHexNoFormat_c);
+    Serial_Print(interfaceId,"\n\rLength: ", gAllowToBlock_d);
+    Serial_PrintHex(interfaceId, (uint8_t*)&pMsgIn->msgData.dataInd.msduLength, 1, gPrtHexNoFormat_c);
+    Serial_Print(interfaceId,"\n\n\r", gAllowToBlock_d);
+
     break;
     
   default:
