@@ -123,6 +123,19 @@ osaEventId_t          mAppEvent;
 /* The current state of the applications state machine */
 uint8_t gState;
 
+
+typedef struct{
+	uint16_t shortAddress;
+	uint64_t extendedAddress;
+	bool_t rxOnWhenIdle;
+	bool_t deviceType;
+}nodo_t;
+
+nodo_t nodeArray[5];
+uint8_t shortIDCount=1;
+uint8_t tmpAddress=0;
+uint8_t alreadyAssociatedID=0;
+
 /************************************************************************************
 *************************************************************************************
 * Public functions
@@ -144,6 +157,27 @@ uint8_t gState;
 * \remarks
 *
 ********************************************************************************** */
+bool_t isAssociated(uint64_t extendedAddress){
+	for(int i=0;i<5;i++){
+		if(nodeArray[i].extendedAddress==extendedAddress){
+			tmpAddress=i+1;
+			return true;
+		}
+	}
+	return false;
+}
+
+void associate(uint64_t extendedAddress, uint8_t capabilityInfo){
+	nodeArray[shortIDCount-1].shortAddress=shortIDCount;
+	tmpAddress=nodeArray[shortIDCount-1].shortAddress;
+	nodeArray[shortIDCount-1].extendedAddress=extendedAddress;
+	nodeArray[shortIDCount-1].rxOnWhenIdle=((capabilityInfo&(0x08))==0x08);
+	nodeArray[shortIDCount-1].deviceType=((capabilityInfo&(0x02))==0x02);//True si es un FFD
+	shortIDCount++;
+}
+
+
+
 void main_task(uint32_t param)
 {
     static uint8_t initialized = FALSE;
@@ -733,8 +767,9 @@ static uint8_t App_SendAssociateResponse(nwkMessage_t *pMsgIn, uint8_t appInstan
        be assigned to it. */
     if(pMsgIn->msgData.associateInd.capabilityInfo & gCapInfoAllocAddr_c)
     {
+      if(!isAssociated(pMsgIn->msgData.associateInd.deviceAddress))associate(pMsgIn->msgData.associateInd.deviceAddress, pMsgIn->msgData.associateInd.capabilityInfo);
       /* Assign a unique short address less than 0xfffe if the device requests so. */
-      pAssocRes->assocShortAddress = 0x0001;
+      pAssocRes->assocShortAddress = tmpAddress;
     }
     else
     {
@@ -774,6 +809,10 @@ static uint8_t App_SendAssociateResponse(nwkMessage_t *pMsgIn, uint8_t appInstan
   }
 }
 
+
+
+
+
 /******************************************************************************
 * The App_HandleMlmeInput(nwkMessage_t *pMsg) function will handle various
 * messages from the MLME, e.g. (Dis)Associate Indication.
@@ -794,6 +833,7 @@ static uint8_t App_HandleMlmeInput(nwkMessage_t *pMsg, uint8_t appInstance)
     /* A device sent us an Associate Request. We must send back a response.  */
     return App_SendAssociateResponse(pMsg, appInstance);
     
+
   case gMlmeCommStatusInd_c:
     /* Sent by the MLME after the Association Response has been transmitted. */
     Serial_Print(interfaceId,"Received an MLME-Comm-Status Indication from the MAC\n\r", gAllowToBlock_d);
@@ -829,6 +869,8 @@ void ledHandler(uint8_t counter){
 		}
 }
 
+
+
 /******************************************************************************
 * The App_HandleMcpsInput(mcpsToNwkMessage_t *pMsgIn) function will handle
 * messages from the MCPS, e.g. Data Confirm, and Data Indication.
@@ -862,6 +904,7 @@ static void App_HandleMcpsInput(mcpsToNwkMessage_t *pMsgIn, uint8_t appInstance)
     Serial_PrintHex(interfaceId, (uint8_t*)&pMsgIn->msgData.dataInd.msduLength, 1, gPrtHexNoFormat_c);
     Serial_Print(interfaceId,"\n\n\r", gAllowToBlock_d);
 
+    ledHandler(counter);
     break;
     
   default:
