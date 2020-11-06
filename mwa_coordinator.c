@@ -846,23 +846,24 @@ static uint8_t App_HandleMlmeInput(nwkMessage_t *pMsg, uint8_t appInstance)
 }
 
 void ledHandler(uint8_t counter){
+	TurnOffLeds();
 	switch(counter)
 		{
 		case 0:
 			//prende rojo
-			Led1On();
+			Led2On();
 			break;
 		case 1:
 			// prende verde
-			Led2On();
+			Led3On();
 			break;
 		case 2:
 			// prende azul
-			Led3On();
+			Led4On();
 			break;
 		case 3:
 			// prende todo
-			Led3On();
+			TurnOnLeds();
 			break;
 		default:
 			break;
@@ -904,7 +905,7 @@ static void App_HandleMcpsInput(mcpsToNwkMessage_t *pMsgIn, uint8_t appInstance)
     Serial_PrintHex(interfaceId, (uint8_t*)&pMsgIn->msgData.dataInd.msduLength, 1, gPrtHexNoFormat_c);
     Serial_Print(interfaceId,"\n\n\r", gAllowToBlock_d);
 
-    ledHandler(counter);
+    ledHandler(counter-48);
     break;
     
   default:
